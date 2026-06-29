@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>YPO MENA · Chapter Performance Index</title>
+<style>
+  :root{
+    --bg:#e9edf3; --card:#ffffff; --line:#e3e8f0; --line2:#eef1f6;
+    --navy:#16233f; --navy2:#1c2c4d; --navyrow:#15233f;
+    --green:#2e6f4e; --check:#3a8a57; --checkbg:#eaf3 ; 
+    --red:#c8615f; --redbg:#fbecec;
+    --gold:#caa23c; --goldbg:#fbf3df;
+    --blue:#2f63d6; --skyblue:#7fb3e8; --inknavy:#0e1c40;
+    --ink:#1f2a44; --muted:#697587; --muted2:#8a94a4;
+    --watch:#d98b2b; --crit:#c8615f; --ok:#3a8a57;
+    --shadow:0 1px 2px rgba(16,32,64,.05),0 4px 14px rgba(16,32,64,.05);
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-feature-settings:"tnum" 1,"cv05" 1; line-height:1.45;
+  }
+  .wrap{max-width:1180px;margin:0 auto;padding:34px 22px 70px}
+  .eyebrow{font-size:12.5px;letter-spacing:.16em;font-weight:700;color:var(--green);text-transform:uppercase;margin:0 0 8px}
+  h1{font-size:clamp(30px,4.4vw,46px);line-height:1.02;font-weight:800;color:var(--navy);margin:0 0 8px;letter-spacing:-.02em}
+  .sub{color:var(--muted);font-size:15px;margin:0 0 26px}
+  .sub b{color:var(--ink);font-weight:600}
+
+  /* KPI cards */
+  .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin:0 0 22px}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 18px 16px;box-shadow:var(--shadow)}
+  .kpi .n{font-size:30px;font-weight:800;color:var(--navy);letter-spacing:-.02em;line-height:1}
+  .kpi .n small{font-size:15px;font-weight:600;color:var(--muted2)}
+  .kpi .l{margin-top:9px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
+
+  /* controls */
+  .bar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:0 0 14px}
+  .search{flex:1 1 320px;display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:13px;padding:12px 16px;box-shadow:var(--shadow)}
+  .search input{border:0;outline:0;font-size:15px;width:100%;background:transparent;color:var(--ink)}
+  .search svg{flex:none;color:var(--muted2)}
+  .pills{display:flex;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:13px;padding:5px;box-shadow:var(--shadow);flex-wrap:wrap}
+  .pill{border:0;background:transparent;color:var(--muted);font-weight:600;font-size:13.5px;padding:8px 14px;border-radius:9px;cursor:pointer;white-space:nowrap}
+  .pill:hover{color:var(--ink)}
+  .pill[aria-pressed=true]{background:var(--navy);color:#fff}
+  .sortrow{display:flex;gap:8px;align-items:center;margin:0 0 16px;color:var(--muted);font-size:13px;flex-wrap:wrap}
+  .sortrow select{border:1px solid var(--line);background:var(--card);border-radius:9px;padding:7px 10px;font:inherit;font-size:13px;color:var(--ink)}
+
+  /* legend */
+  .legend{display:flex;gap:18px;flex-wrap:wrap;align-items:center;margin:0 0 16px;font-size:13px;color:var(--muted)}
+  .legend .it{display:flex;align-items:center;gap:7px}
+  .dot{width:11px;height:11px;border-radius:3px;display:inline-block}
+  .sev{width:9px;height:9px;border-radius:50%}
+
+  /* table head */
+  .thead{display:grid;grid-template-columns:1.7fr .8fr 1fr .7fr 1.5fr .8fr 34px;gap:0;
+    background:var(--navyrow);color:#cdd6e6;border-radius:14px 14px 0 0;
+    padding:14px 18px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;align-items:center}
+  .thead .r{text-align:right}.thead .c{text-align:center}
+
+  .list{background:var(--card);border:1px solid var(--line);border-top:0;border-radius:0 0 16px 16px;overflow:hidden;box-shadow:var(--shadow)}
+  .row{display:grid;grid-template-columns:1.7fr .8fr 1fr .7fr 1.5fr .8fr 34px;gap:0;align-items:center;
+    padding:15px 18px;border-top:1px solid var(--line2);cursor:pointer;transition:background .12s}
+  .row:hover{background:#f7f9fc}
+  .row:first-child{border-top:0}
+
+  .cname{display:flex;flex-direction:column;gap:5px;min-width:0}
+  .cname .nm{font-weight:700;color:var(--navy);font-size:15px;letter-spacing:-.01em}
+  .cname .tags{display:flex;gap:6px;flex-wrap:wrap}
+  .tag{font-size:10.5px;font-weight:700;letter-spacing:.04em;padding:2px 7px;border-radius:6px;text-transform:uppercase}
+  .tag.plat{background:#eef1f7;color:#56627a}
+  .tag.silver{background:#f3eee6;color:#9a7b46}
+  .tag.gold{background:var(--goldbg);color:#9a7b27}
+  .tag.flag{background:var(--redbg);color:var(--crit)}
+  .tag.clean{background:#eaf4ee;color:var(--green)}
+
+  .health{display:flex;align-items:center;justify-content:flex-start;gap:9px}
+  .hscore{font-size:19px;font-weight:800;color:var(--navy)}
+  .hscore small{font-size:12px;color:var(--muted2);font-weight:600}
+
+  .cmt{display:flex;flex-direction:column;gap:5px}
+  .cmt .lbl{font-size:13px;font-weight:700;color:var(--navy)}
+  .cmt .lbl small{color:var(--muted2);font-weight:600;font-size:11px}
+  .bartrack{height:6px;background:#eef1f6;border-radius:99px;overflow:hidden}
+  .barfill{height:100%;border-radius:99px;background:var(--check)}
+  .barfill.warn{background:var(--watch)}
+
+  .members{text-align:center;font-weight:800;font-size:17px;color:var(--navy)}
+  .members.low{color:var(--crit)}
+  .members small{display:block;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted2);font-weight:600;margin-top:2px}
+
+  .eng{display:flex;flex-direction:column;gap:5px}
+  .engbar{height:11px;border-radius:4px;overflow:hidden;display:flex;background:#eef1f6}
+  .engbar span{height:100%}
+  .s-hi{background:var(--inknavy)} .s-en{background:var(--blue)} .s-so{background:var(--skyblue)} .s-pa{background:var(--gold)}
+  .eng .act{font-size:11.5px;color:var(--muted)}
+  .eng .act b{color:var(--navy);font-weight:700}
+
+  .si{text-align:center}
+  .sichip{display:inline-block;font-weight:800;font-size:16px;padding:4px 10px;border-radius:9px}
+  .si-ok{background:#eaf4ee;color:var(--green)} .si-warn{background:var(--redbg);color:var(--crit)} .si-na{background:#f0f2f6;color:var(--muted2);font-size:13px}
+  .si small{display:block;font-size:10px;color:var(--muted2);margin-top:3px;letter-spacing:.04em}
+
+  .chev{justify-self:center;color:var(--muted2);transition:transform .18s}
+  .row[aria-expanded=true] .chev{transform:rotate(90deg);color:var(--navy)}
+
+  /* detail panel */
+  .detail{display:none;padding:4px 18px 24px;border-top:1px solid var(--line2);background:#fafbfd}
+  .row[aria-expanded=true]+.detail{display:block}
+  .focus{margin:18px 0 4px}
+  .focus h4,.grid h4{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:0 0 10px}
+  .flags{display:flex;flex-direction:column;gap:8px}
+  .fl{display:flex;gap:11px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:11px;padding:11px 13px}
+  .fl .sev{margin-top:5px;flex:none}
+  .sev.crit{background:var(--crit)} .sev.watch{background:var(--watch)} .sev.ok{background:var(--ok)}
+  .fl .ft{font-size:13.5px}
+  .fl .ft b{color:var(--navy)}
+  .fl .ft .lens{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted2);font-weight:700;margin-right:7px}
+
+  .dgrid{display:grid;grid-template-columns:1.4fr 1fr;gap:24px;margin-top:22px}
+  @media(max-width:760px){.dgrid{grid-template-columns:1fr}}
+  .commits{display:flex;flex-wrap:wrap;gap:7px}
+  .ci{display:flex;align-items:center;gap:7px;font-size:12.5px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:6px 9px}
+  .ci .mk{width:17px;height:17px;border-radius:5px;display:grid;place-items:center;color:#fff;font-size:11px;flex:none}
+  .ci.met .mk{background:var(--check)} .ci.miss .mk{background:var(--red)}
+  .ci.miss{border-color:#f1d6d6;background:#fdf6f6}
+  .ci .nm{color:var(--ink)} .ci.miss .nm{color:var(--crit);font-weight:600}
+
+  .stats{display:flex;flex-direction:column;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .st{display:flex;justify-content:space-between;align-items:baseline;background:#fff;padding:11px 14px}
+  .st .k{font-size:13px;color:var(--muted)}
+  .st .v{font-size:15px;font-weight:700;color:var(--navy)}
+  .st .v.lowv{color:var(--crit)}
+
+  .englab{display:flex;flex-wrap:wrap;gap:14px;margin-top:11px;font-size:12px;color:var(--muted)}
+  .englab .it{display:flex;align-items:center;gap:6px}
+  .englab b{color:var(--navy)}
+
+  .empty{padding:40px;text-align:center;color:var(--muted)}
+  footer{margin-top:26px;color:var(--muted2);font-size:12px;line-height:1.6}
+  footer b{color:var(--muted)}
+  .note{background:#fff;border:1px solid var(--line);border-radius:13px;padding:15px 18px;margin-top:20px;font-size:12.5px;color:var(--muted)}
+  .note b{color:var(--ink)}
+
+  @media(max-width:920px){
+    .kpis{grid-template-columns:repeat(2,1fr)}
+    .thead{display:none}
+    .row{grid-template-columns:1fr auto;gap:10px 14px;row-gap:13px;padding:16px}
+    .row>div{min-width:0}
+    .cname{grid-column:1/2;grid-row:1}
+    .chev{grid-column:2/3;grid-row:1;align-self:start}
+    .health{grid-column:1/3;grid-row:2;justify-content:flex-start}
+    .health::before{content:"Health";font-size:11px;color:var(--muted2);margin-right:4px;font-weight:600}
+    .cmt{grid-column:1/2;grid-row:3} .members{grid-column:2/3;grid-row:3;text-align:right}
+    .eng{grid-column:1/3;grid-row:4} .si{grid-column:1/3;grid-row:5;text-align:left}
+    .si .sichip{margin-top:2px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="eyebrow">YPO · Middle East / North Africa</p>
+  <h1>Chapter Performance Index</h1>
+  <p class="sub">Five-lens health view across all MENA chapters · <b>As of 29 June 2026</b></p>
+
+  <div class="kpis" id="kpis"></div>
+
+  <div class="bar">
+    <label class="search">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
+      <input id="q" type="search" placeholder="Search chapters…" autocomplete="off">
+    </label>
+    <div class="pills" id="filters" role="group" aria-label="Filter">
+      <button class="pill" data-f="all" aria-pressed="true">All</button>
+      <button class="pill" data-f="flag">Flagged</button>
+      <button class="pill" data-f="met">Fully met</button>
+      <button class="pill" data-f="sub30">Under 30</button>
+      <button class="pill" data-f="silver">Below Platinum</button>
+    </div>
+  </div>
+
+  <div class="sortrow">
+    <span>Sort by</span>
+    <select id="sort">
+      <option value="name" selected>Chapter name (A–Z)</option>
+      <option value="flags">Focus areas (most first)</option>
+      <option value="health">Health score</option>
+      <option value="met">Commitments met</option>
+      <option value="primary">Members</option>
+      <option value="active">Engagement (% active)</option>
+      <option value="si">Satisfaction</option>
+    </select>
+  </div>
+
+  <div class="legend">
+    <span class="it"><span class="dot s-hi"></span>Highly engaged</span>
+    <span class="it"><span class="dot s-en"></span>Engaged</span>
+    <span class="it"><span class="dot s-so"></span>Somewhat</span>
+    <span class="it"><span class="dot s-pa"></span>Passive / not engaged</span>
+    <span class="it"><span class="sev crit"></span>Needs attention</span>
+    <span class="it"><span class="sev watch"></span>Watch</span>
+    <span class="it"><span class="sev ok"></span>Strong</span>
+  </div>
+
+  <div class="thead">
+    <div>Chapter</div><div>Health</div><div>Commitments</div>
+    <div class="c">Members</div><div>Engagement</div><div class="c">Satisfaction</div><div></div>
+  </div>
+  <div class="list" id="list"></div>
+
+  <div class="note">
+    <b>How focus areas are flagged.</b>
+    Commitments — any of the 14 chapter commitments not yet met.
+    Membership — fewer than 30 primary members (sub-scale threshold).
+    Health — chapter health band below Platinum, or overall score in the lower tier.
+    Engagement — active share (highly + engaged) under 50%, or passive / not-engaged at 5%+.
+    Satisfaction — Q3 FY26 SI score below 3.5 (5-point scale); a response base of 3 or fewer is noted as low-confidence.
+  </div>
+
+  <footer>
+    Sources: Chapter Commitments by Status, Chapter Health Metrics (Overall Rankings) &amp; MENA Primary Members by Chapter (Salesforce exports, 29 Jun 2026); Engagement by Chapter and Q3 FY26 Satisfaction Index.
+    Engagement percentages are read from the engagement chart and rounded. <b>Confidential — do not distribute.</b>
+  </footer>
+</div>
+
+<script>
+const DATA = [{"name":"YPO UAE Integrated","short":"UAE Integrated","status":"Platinum","health":38,"primary":66,"secondary":7,"total":73,"pct_female":18.2,"retention":90.9,"forum_participation":92.0,"profile":59.0,"met":14,"unmet":[],"eng":[30.3,51.5,18.2,0.0],"si_n":5,"si":3.8},{"name":"YPO Olive MENA Regional Integrated","short":"Olive MENA Regional Integrated","status":"Platinum","health":34,"primary":29,"secondary":2,"total":31,"pct_female":10.3,"retention":85.0,"forum_participation":79.0,"profile":69.0,"met":13,"unmet":["Officer Trained"],"eng":[31.0,55.2,13.8,0.0],"si_n":6,"si":3.67},{"name":"YPO Oman Integrated","short":"Oman Integrated","status":"Platinum","health":33,"primary":59,"secondary":8,"total":67,"pct_female":15.3,"retention":94.9,"forum_participation":81.0,"profile":100.0,"met":11,"unmet":["Charter","Officer Trained","Forum Training"],"eng":[10.2,47.5,40.7,1.6],"si_n":5,"si":4.6},{"name":"YPO Gold Lebanon","short":"Gold Lebanon","status":"Platinum","health":36,"primary":54,"secondary":18,"total":72,"pct_female":16.7,"retention":100.0,"forum_participation":74.0,"profile":48.0,"met":13,"unmet":["Officer Trained"],"eng":[11.1,38.9,48.1,1.9],"si_n":6,"si":3.17},{"name":"YPO Jordan Integrated","short":"Jordan Integrated","status":"Platinum","health":33,"primary":79,"secondary":10,"total":89,"pct_female":11.4,"retention":88.5,"forum_participation":41.0,"profile":90.0,"met":13,"unmet":["Charter"],"eng":[5.0,32.5,57.5,5.0],"si_n":6,"si":3.67},{"name":"YPO Lebanon","short":"Lebanon","status":"Platinum","health":37,"primary":47,"secondary":12,"total":59,"pct_female":14.9,"retention":100.0,"forum_participation":72.0,"profile":57.0,"met":13,"unmet":["Charter"],"eng":[12.8,34.0,48.9,4.3],"si_n":4,"si":4.25},{"name":"YPO Capital Pakistan Integrated","short":"Capital Pakistan Integrated","status":"Platinum","health":34,"primary":47,"secondary":4,"total":51,"pct_female":4.3,"retention":97.7,"forum_participation":62.0,"profile":68.0,"met":12,"unmet":["Charter","Forum Training"],"eng":[12.8,46.8,40.4,0.0],"si_n":5,"si":4.2},{"name":"YPO Levant Integrated","short":"Levant Integrated","status":"Platinum","health":38,"primary":44,"secondary":14,"total":58,"pct_female":15.9,"retention":97.4,"forum_participation":89.0,"profile":84.0,"met":14,"unmet":[],"eng":[25.0,61.4,13.6,0.0],"si_n":8,"si":3.63},{"name":"YPO Pakistan","short":"Pakistan","status":"Platinum","health":36,"primary":57,"secondary":5,"total":62,"pct_female":21.1,"retention":93.1,"forum_participation":77.0,"profile":79.0,"met":13,"unmet":["Officer Trained"],"eng":[14.0,42.1,40.4,3.5],"si_n":1,"si":5.0},{"name":"YPO Dubai Integrated","short":"Dubai Integrated","status":"Platinum","health":38,"primary":169,"secondary":27,"total":196,"pct_female":20.1,"retention":95.6,"forum_participation":82.0,"profile":81.0,"met":12,"unmet":["Officer ID","Forum Training"],"eng":[29.0,37.9,32.0,1.1],"si_n":16,"si":3.56},{"name":"YPO MENA One Regional Integrated","short":"MENA One Regional Integrated","status":"Platinum","health":38,"primary":109,"secondary":23,"total":132,"pct_female":25.7,"retention":90.5,"forum_participation":90.0,"profile":94.0,"met":14,"unmet":[],"eng":[28.4,48.6,22.9,0.0],"si_n":9,"si":4.11},{"name":"YPO Gold Pakistan","short":"Gold Pakistan","status":"Platinum","health":32,"primary":69,"secondary":7,"total":76,"pct_female":5.8,"retention":97.1,"forum_participation":62.0,"profile":81.0,"met":12,"unmet":["Charter","Officer ID"],"eng":[7.2,42.0,47.8,2.9],"si_n":6,"si":3.0},{"name":"YPO Gold Saudi","short":"Gold Saudi","status":"Platinum","health":34,"primary":80,"secondary":13,"total":93,"pct_female":2.5,"retention":91.6,"forum_participation":66.0,"profile":79.0,"met":11,"unmet":["Charter","Officer Trained","Forum Training"],"eng":[2.4,25.0,66.3,6.3],"si_n":6,"si":3.83},{"name":"YPO Dubai Downtown Integrated","short":"Dubai Downtown Integrated","status":"Platinum","health":38,"primary":107,"secondary":20,"total":127,"pct_female":13.1,"retention":95.9,"forum_participation":87.0,"profile":79.0,"met":14,"unmet":[],"eng":[27.1,50.5,22.4,0.0],"si_n":10,"si":3.6},{"name":"YPO Saudi","short":"Saudi","status":"Platinum","health":34,"primary":110,"secondary":15,"total":125,"pct_female":9.1,"retention":91.5,"forum_participation":76.0,"profile":57.0,"met":13,"unmet":["Forum Training"],"eng":[1.0,23.6,70.9,4.5],"si_n":6,"si":3.33},{"name":"YPO Cairo Integrated","short":"Cairo Integrated","status":"Platinum","health":34,"primary":84,"secondary":1,"total":85,"pct_female":19.0,"retention":90.7,"forum_participation":76.0,"profile":68.0,"met":11,"unmet":["Charter","Officer Trained","Forum Mod"],"eng":[14.3,48.8,34.5,2.4],"si_n":12,"si":3.75},{"name":"YPO Emirates Integrated","short":"Emirates Integrated","status":"Platinum","health":37,"primary":166,"secondary":46,"total":212,"pct_female":12.7,"retention":97.0,"forum_participation":75.0,"profile":84.0,"met":14,"unmet":[],"eng":[22.3,53.6,24.1,0.0],"si_n":22,"si":4.09},{"name":"YPO Morocco Integrated","short":"Morocco Integrated","status":"Platinum","health":38,"primary":70,"secondary":5,"total":75,"pct_female":17.1,"retention":97.1,"forum_participation":77.0,"profile":99.0,"met":14,"unmet":[],"eng":[4.3,37.1,57.1,1.5],"si_n":6,"si":4.17},{"name":"YPO Palestine Integrated","short":"Palestine Integrated","status":"Platinum","health":32,"primary":23,"secondary":1,"total":24,"pct_female":8.7,"retention":100.0,"forum_participation":30.0,"profile":100.0,"met":12,"unmet":["Charter","Officer Trained"],"eng":[0.0,47.8,52.2,0.0],"si_n":2,"si":3.0},{"name":"YPO Indus Integrated","short":"Indus Integrated","status":"Platinum","health":35,"primary":66,"secondary":2,"total":68,"pct_female":1.5,"retention":92.3,"forum_participation":74.0,"profile":91.0,"met":11,"unmet":["Charter","Officer ID","Forum Training"],"eng":[9.1,36.4,54.5,0.0],"si_n":5,"si":2.6},{"name":"YPO Bahrain Integrated","short":"Bahrain Integrated","status":"Platinum","health":33,"primary":39,"secondary":16,"total":55,"pct_female":7.7,"retention":97.4,"forum_participation":59.0,"profile":64.0,"met":11,"unmet":["Charter","Officer Trained","Forum Training"],"eng":[10.3,28.2,53.8,7.7],"si_n":3,"si":3.33},{"name":"YPO Tunisia Integrated","short":"Tunisia Integrated","status":"Platinum","health":37,"primary":29,"secondary":1,"total":30,"pct_female":13.8,"retention":96.4,"forum_participation":79.0,"profile":83.0,"met":14,"unmet":[],"eng":[20.7,44.8,34.5,0.0],"si_n":3,"si":3.0},{"name":"YPO Khaleej Integrated","short":"Khaleej Integrated","status":"Platinum","health":37,"primary":24,"secondary":8,"total":32,"pct_female":20.8,"retention":95.7,"forum_participation":71.0,"profile":54.0,"met":13,"unmet":["Learning Cal"],"eng":[16.7,41.7,37.5,4.2],"si_n":null,"si":null},{"name":"YPO Kuwait Integrated","short":"Kuwait Integrated","status":"Platinum","health":32,"primary":45,"secondary":1,"total":46,"pct_female":11.1,"retention":100.0,"forum_participation":64.0,"profile":47.0,"met":10,"unmet":["Charter","Officer Trained","Forum Mod","Forum Training"],"eng":[15.6,37.8,44.4,2.2],"si_n":5,"si":3.2},{"name":"YPO MENA Gulf Regional Integrated","short":"MENA Gulf Regional Integrated","status":"Platinum","health":33,"primary":34,"secondary":10,"total":44,"pct_female":5.9,"retention":100.0,"forum_participation":79.0,"profile":85.0,"met":13,"unmet":["Forum Training"],"eng":[55.9,23.5,20.6,0.0],"si_n":2,"si":4.5},{"name":"YPO Qatar Integrated","short":"Qatar Integrated","status":"Silver","health":27,"primary":29,"secondary":7,"total":36,"pct_female":13.8,"retention":93.1,"forum_participation":38.0,"profile":48.0,"met":10,"unmet":["Officer Trained","Conduct Cmte","Forum Mod","Forum Training"],"eng":[13.8,27.6,48.3,10.3],"si_n":3,"si":3.33},{"name":"YPO Iraq Integrated","short":"Iraq Integrated","status":"Silver","health":20,"primary":23,"secondary":2,"total":25,"pct_female":13.0,"retention":null,"forum_participation":48.0,"profile":22.0,"met":11,"unmet":["Officer Trained","Forum Mod","Forum Training"],"eng":[13.0,26.1,52.2,8.7],"si_n":1,"si":5.0}];
+const LENS = {commit:'Commitments',member:'Membership',health:'Health',eng:'Engagement',si:'Satisfaction'};
+
+function flagsFor(c){
+  const f=[];
+  // Commitments
+  if(c.met===14){ f.push({lens:'commit',sev:'ok',t:'<b>All 14 commitments met.</b>'}); }
+  else { const n=14-c.met; f.push({lens:'commit',sev:n>=3?'crit':'watch',
+      t:'<b>'+n+' commitment'+(n>1?'s':'')+' open</b> — '+c.unmet.join(', ')+'.'}); }
+  // Membership
+  if(c.primary<30) f.push({lens:'member',sev:'crit',t:'<b>Sub-scale: '+c.primary+' primary members</b> (under 30).'});
+  // Health
+  if(c.status!=='Platinum') f.push({lens:'health',sev:'crit',t:'<b>'+c.status+' health band</b> — overall score '+c.health+'.'});
+  else if(c.health<=33) f.push({lens:'health',sev:'watch',t:'<b>Lower-tier health score ('+c.health+')</b> within the Platinum band.'});
+  // Engagement
+  if(c.eng){
+    const act=c.eng[0]+c.eng[1], pas=c.eng[3];
+    if(act<50) f.push({lens:'eng',sev:'crit',t:'<b>Low active engagement — '+act.toFixed(1)+'%</b> highly engaged or engaged.'});
+    if(pas>=5) f.push({lens:'eng',sev:'watch',t:'<b>'+pas.toFixed(1)+'% passive / not engaged.</b>'});
+  }
+  // Satisfaction
+  if(c.si==null) f.push({lens:'si',sev:'watch',t:'<b>No satisfaction score reported</b> this quarter.'});
+  else {
+    if(c.si<3.5) f.push({lens:'si',sev:'crit',t:'<b>Satisfaction '+c.si.toFixed(2)+'</b> — below the 3.5 line.'});
+    if(c.si_n!=null && c.si_n<=3) f.push({lens:'si',sev:'watch',t:'<b>Low response base ('+c.si_n+')</b> — read the SI score with caution.'});
+  }
+  return f;
+}
+function problemCount(c){ return flagsFor(c).filter(x=>x.sev!=='ok').length; }
+
+const COMMITS=['Charter','Bylaws','Strategic Plan','Officer ID','Officer Trained','RBM','Conduct Cmte','CMW','Learning Cal','Forum Mod','Forum Training','Forum Data','Membership','Min Members'];
+
+let state={f:'all',q:'',sort:'name'};
+
+function kpis(){
+  const n=DATA.length;
+  const met=DATA.filter(c=>c.met===14).length;
+  const sub=DATA.filter(c=>c.primary<30).length;
+  const sil=DATA.filter(c=>c.status!=='Platinum').length;
+  const siList=DATA.filter(c=>c.si!=null);
+  const siAvg=(siList.reduce((a,c)=>a+c.si,0)/siList.length).toFixed(2);
+  const clean=DATA.filter(c=>problemCount(c)===0).length;
+  const cards=[
+    [n,'','Chapters'],
+    [met,'/ '+n,'Commitments fully met'],
+    [sub,'','Under 30 members'],
+    [sil,'','Below Platinum'],
+    [siAvg,'','Avg satisfaction'],
+  ];
+  document.getElementById('kpis').innerHTML=cards.map(c=>
+    '<div class="kpi"><div class="n">'+c[0]+(c[1]?' <small>'+c[1]+'</small>':'')+'</div><div class="l">'+c[2]+'</div></div>').join('');
+}
+
+function engBar(e){
+  if(!e) return '<div class="engbar"></div>';
+  const cls=['s-hi','s-en','s-so','s-pa'];
+  return '<div class="engbar">'+e.map((v,i)=>v>0?'<span class="'+cls[i]+'" style="width:'+v+'%"></span>':'').join('')+'</div>';
+}
+
+function rowHTML(c,idx){
+  const pc=problemCount(c);
+  const tag = c.met===14&&pc===0 ? '<span class="tag clean">On track</span>'
+            : pc>0 ? '<span class="tag flag">'+pc+' focus area'+(pc>1?'s':'')+'</span>' : '';
+  const band = c.status==='Platinum'?'plat':(c.status==='Silver'?'silver':'gold');
+  const gold = c.name.includes('Gold')?'<span class="tag gold">Gold</span>':'';
+  const pct=Math.round(c.met/14*100);
+  const act=c.eng?(c.eng[0]+c.eng[1]):null;
+  const siCls=c.si==null?'si-na':(c.si<3.5?'si-warn':'si-ok');
+  const siTxt=c.si==null?'—':c.si.toFixed(2);
+  return `
+  <div class="row" role="button" tabindex="0" aria-expanded="false" data-i="${idx}">
+    <div class="cname">
+      <span class="nm">${c.short}</span>
+      <span class="tags"><span class="tag ${band}">${c.status}</span>${gold}${tag}</span>
+    </div>
+    <div class="health"><span class="hscore">${c.health}</span></div>
+    <div class="cmt">
+      <span class="lbl">${c.met}<small>/14</small></span>
+      <div class="bartrack"><div class="barfill ${c.met<14?'warn':''}" style="width:${pct}%"></div></div>
+    </div>
+    <div class="members ${c.primary<30?'low':''}">${c.primary}<small>members</small></div>
+    <div class="eng">
+      ${engBar(c.eng)}
+      <span class="act">${act!=null?'<b>'+act.toFixed(0)+'%</b> active':'<span style=\"color:var(--muted2)\">no data</span>'}</span>
+    </div>
+    <div class="si"><span class="sichip ${siCls}">${siTxt}</span><small>${c.si_n!=null?'n='+c.si_n:''}</small></div>
+    <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m9 6 6 6-6 6"/></svg>
+  </div>
+  <div class="detail">
+    <div class="focus">
+      <h4>Focus areas</h4>
+      <div class="flags">${flagsFor(c).map(fl=>`<div class="fl"><span class="sev ${fl.sev}"></span><span class="ft"><span class="lens">${LENS[fl.lens]}</span>${fl.t}</span></div>`).join('')}</div>
+    </div>
+    <div class="dgrid">
+      <div class="grid">
+        <h4>Commitments · ${c.met} of 14 met</h4>
+        <div class="commits">${COMMITS.map(k=>{const miss=c.unmet.includes(k);return `<span class="ci ${miss?'miss':'met'}"><span class="mk">${miss?'✕':'✓'}</span><span class="nm">${k}</span></span>`}).join('')}</div>
+        <h4 style="margin-top:20px">Engagement profile</h4>
+        ${engBar(c.eng)}
+        ${c.eng?`<div class="englab">
+          <span class="it"><span class="dot s-hi"></span>Highly <b>${c.eng[0].toFixed(1)}%</b></span>
+          <span class="it"><span class="dot s-en"></span>Engaged <b>${c.eng[1].toFixed(1)}%</b></span>
+          <span class="it"><span class="dot s-so"></span>Somewhat <b>${c.eng[2].toFixed(1)}%</b></span>
+          <span class="it"><span class="dot s-pa"></span>Passive <b>${c.eng[3].toFixed(1)}%</b></span>
+        </div>`:'<div class="englab">No engagement data.</div>'}
+      </div>
+      <div class="grid">
+        <h4>Chapter detail</h4>
+        <div class="stats">
+          <div class="st"><span class="k">Health band</span><span class="v">${c.status} · ${c.health}</span></div>
+          <div class="st"><span class="k">Primary members</span><span class="v ${c.primary<30?'lowv':''}">${c.primary}</span></div>
+          <div class="st"><span class="k">Total membership</span><span class="v">${c.total}</span></div>
+          <div class="st"><span class="k">Female (primary)</span><span class="v">${c.pct_female}%</span></div>
+          <div class="st"><span class="k">Retention</span><span class="v">${c.retention!=null?c.retention+'%':'—'}</span></div>
+          <div class="st"><span class="k">Forum participation</span><span class="v">${c.forum_participation}%</span></div>
+          <div class="st"><span class="k">Member profiles complete</span><span class="v">${c.profile}%</span></div>
+          <div class="st"><span class="k">Satisfaction (Q3 FY26)</span><span class="v ${c.si!=null&&c.si<3.5?'lowv':''}">${c.si!=null?c.si.toFixed(2)+'  ('+c.si_n+' resp.)':'—'}</span></div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function apply(){
+  let rows=DATA.slice();
+  if(state.q){const q=state.q.toLowerCase();rows=rows.filter(c=>c.short.toLowerCase().includes(q));}
+  if(state.f==='flag') rows=rows.filter(c=>problemCount(c)>0);
+  if(state.f==='met') rows=rows.filter(c=>c.met===14);
+  if(state.f==='sub30') rows=rows.filter(c=>c.primary<30);
+  if(state.f==='silver') rows=rows.filter(c=>c.status!=='Platinum');
+  const s=state.sort;
+  rows.sort((a,b)=>{
+    if(s==='name') return a.short.localeCompare(b.short);
+    if(s==='flags') return problemCount(b)-problemCount(a) || b.health-a.health;
+    if(s==='active') return ((b.eng?b.eng[0]+b.eng[1]:-1))-((a.eng?a.eng[0]+a.eng[1]:-1));
+    if(s==='si') return (b.si??-1)-(a.si??-1);
+    return (b[s]??-1)-(a[s]??-1);
+  });
+  const list=document.getElementById('list');
+  list.innerHTML = rows.length? rows.map((c)=>rowHTML(c,DATA.indexOf(c))).join('')
+    : '<div class="empty">No chapters match these filters.</div>';
+  bind();
+}
+function bind(){
+  document.querySelectorAll('.row').forEach(r=>{
+    const toggle=()=>{const open=r.getAttribute('aria-expanded')==='true';r.setAttribute('aria-expanded',!open);};
+    r.addEventListener('click',toggle);
+    r.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle();}});
+  });
+}
+document.getElementById('q').addEventListener('input',e=>{state.q=e.target.value;apply();});
+document.getElementById('sort').addEventListener('change',e=>{state.sort=e.target.value;apply();});
+document.getElementById('filters').addEventListener('click',e=>{
+  const b=e.target.closest('.pill'); if(!b)return;
+  state.f=b.dataset.f;
+  document.querySelectorAll('.pill').forEach(p=>p.setAttribute('aria-pressed',p===b));
+  apply();
+});
+kpis();apply();
+</script>
+</body>
+</html>
