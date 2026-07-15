@@ -147,6 +147,22 @@
   .notebody .act span{font-size:13.5px;color:#7a3230;line-height:1.5;font-weight:600}
   .empty{padding:40px;text-align:center;color:var(--muted)}
 
+  /* ===== Notes gate ===== */
+  .gate{max-width:380px;margin:60px auto;background:var(--card);border:1px solid var(--line);border-radius:16px;
+    padding:28px 26px;box-shadow:var(--shadow);text-align:center}
+  .gate svg{color:var(--muted2);margin-bottom:10px}
+  .gate h3{margin:0 0 6px;font-size:17px;color:var(--navy);font-weight:800}
+  .gate p{margin:0 0 18px;font-size:13.5px;color:var(--muted)}
+  .gate input{width:100%;border:1px solid var(--line);border-radius:11px;padding:12px 14px;font:inherit;font-size:15px;
+    text-align:center;letter-spacing:.04em;color:var(--ink);margin-bottom:10px}
+  .gate input:focus{outline:2px solid var(--green);outline-offset:1px}
+  .gate button{width:100%;border:0;background:var(--navy);color:#fff;font-weight:700;font-size:14px;padding:12px;
+    border-radius:11px;cursor:pointer}
+  .gate button:hover{background:var(--navy2)}
+  .gate .err{color:var(--crit);font-size:12.5px;margin:10px 0 0;display:none}
+  .gate .err.show{display:block}
+  #notesContent{display:none}
+
   /* ===== Commitments matrix ===== */
   .cwrap{overflow:auto;max-height:78vh;border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);background:#fff}
   table.cm{border-collapse:separate;border-spacing:0;width:100%;min-width:1060px}
@@ -297,14 +313,25 @@
     <h1>Chapter Notes</h1>
     <p class="sub">Qualitative context from past Regional Chair visits and Game Plans · click a chapter to expand · <b>internal use only</b></p>
 
-    <div class="bar">
-      <label class="search">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
-        <input id="qN" type="search" placeholder="Search chapters…" autocomplete="off">
-      </label>
+    <div class="gate" id="notesGate">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+      <h3>Internal use only</h3>
+      <p>Enter the password to view chapter notes.</p>
+      <input id="notesPw" type="password" placeholder="Password" autocomplete="off">
+      <button id="notesGateBtn">Unlock</button>
+      <p class="err" id="notesGateErr">Incorrect password — try again.</p>
     </div>
 
-    <div id="listNotes"></div>
+    <div id="notesContent">
+      <div class="bar">
+        <label class="search">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
+          <input id="qN" type="search" placeholder="Search chapters…" autocomplete="off">
+        </label>
+      </div>
+
+      <div id="listNotes"></div>
+    </div>
   </section>
 
   <footer>
@@ -569,6 +596,23 @@ function applyN(){
 }
 document.getElementById('qN').addEventListener('input',e=>{stateN.q=e.target.value;applyN();});
 
+/* ---------- Notes gate ---------- */
+const NOTES_PW='menarcrd';
+function unlockNotes(){
+  document.getElementById('notesGate').style.display='none';
+  document.getElementById('notesContent').style.display='block';
+  try{sessionStorage.setItem('notesUnlocked','1');}catch(e){}
+}
+function tryUnlock(){
+  const v=document.getElementById('notesPw').value;
+  const err=document.getElementById('notesGateErr');
+  if(v===NOTES_PW){err.classList.remove('show');unlockNotes();}
+  else{err.classList.add('show');}
+}
+document.getElementById('notesGateBtn').addEventListener('click',tryUnlock);
+document.getElementById('notesPw').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();tryUnlock();}});
+(function(){try{if(sessionStorage.getItem('notesUnlocked')==='1')unlockNotes();}catch(e){}})();
+
 function selectTab(id){
   const map={'tab-index':'panel-index','tab-commit':'panel-commit','tab-notes':'panel-notes'};
   Object.keys(map).forEach(t=>{
@@ -576,6 +620,7 @@ function selectTab(id){
     document.getElementById(t).setAttribute('aria-selected',on);
     document.getElementById(map[t]).classList.toggle('active',on);
   });
+  if(id==='tab-notes'){document.getElementById('notesPw').value='';document.getElementById('notesGateErr').classList.remove('show');}
 }
 document.getElementById('tab-index').addEventListener('click',()=>selectTab('tab-index'));
 document.getElementById('tab-commit').addEventListener('click',()=>selectTab('tab-commit'));
